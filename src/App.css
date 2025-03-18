@@ -36,3 +36,25 @@
     transform: rotate(360deg);
   }
 }
+
+.table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.table-grid-header > tr > th {
+  font-weight: bold;
+  text-align: left;
+  background-color: #e0e0e0;
+  border-bottom: 2px solid #ccc;
+}
+
+.table-grid-item {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: left;
+}
