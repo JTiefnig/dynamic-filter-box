@@ -1,103 +1,68 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import DynamicTable from "./DynamicTable";
 import "./App.css";
-import originaltabledata from "./data/data.json";
 
-function parseQuery(query) {
-  const conditions = [];
-  const regex = /(\w+)\s*(>=|<=|>|<|:|~)\s*("?[\w\s]+"?)/g;
-
-  let match;
-  while ((match = regex.exec(query)) !== null) {
-    let [, field, operator, value] = match;
-    value = value.replace(/"/g, ""); // Remove quotes
-    conditions.push({ field, operator, value });
-  }
-
-  return conditions;
-}
-
-function filterJsonObjects(data, query) {
-  const operators = {
-    ":": (a, b) => a == b, // Loose comparison for type flexibility
-    ">=": (a, b) => a >= b,
-    "<=": (a, b) => a <= b,
-    ">": (a, b) => a > b,
-    "<": (a, b) => a < b,
-    "~": (a, b) => a.includes(b),
-  };
-
-  const conditions = parseQuery(query);
-
-  return data.filter((obj) => {
-    return conditions.every(({ field, operator, value }) => {
-      if (!(field in obj)) return false;
-
-      let objValue = obj[field];
-
-      // Convert to number if applicable
-      if (!isNaN(objValue) && !isNaN(value)) {
-        objValue = Number(objValue);
-        value = Number(value);
-      }
-
-      return operators[operator](objValue, value);
-    });
-  });
-}
+const data_url =
+  "https://raw.githubusercontent.com/Ovi/DummyJSON/refs/heads/master/database/products.json";
 
 function App() {
-  const [tabledata, setTableData] = useState(originaltabledata);
+  const [originaltabledata, setOriginalTableData] = useState([]);
+
+  const [tabledata, setTableData] = useState([]);
+
+  useEffect(() => {
+    fetch(data_url)
+      .then((res) => res.json())
+      .then((data) => {
+        setOriginalTableData(data);
+        setTableData(data);
+      });
+  }, []);
+
   const [filterError, setFilterError] = useState("");
+  const [filterExpression, setFitlerExpression] = useState("");
 
-  function setFilterData(e) {
-    const filterExpression = e.target.value;
+  useEffect(() => {
+    setFilterData();
+  }, [filterExpression]);
 
-    try {
-      const filteredData = filterJsonObjects(
-        originaltabledata,
-        filterExpression
-      );
-      setFilterError("");
-      setTableData(filteredData);
-    } catch (e) {
-      setFilterError(e.message);
-    }
-  }
+  function setFilterData() {}
 
-  function getTableColumns() {
-    return Object.keys(tabledata[0] || {});
-  }
+  const table_colums = [
+    "id",
+    "title",
+    "category",
+    "price",
+    "discountPercentage",
+    "rating",
+    "tags",
+    "availabilityStatus",
+  ];
 
   return (
     <div className="App">
       <h1>Testing Filter Script</h1>
 
+      <div className="dynamic-input">
+        <div className="element A"></div>
+        <div className="element O"></div>
+        <input type="text" className="element" />
+      </div>
+
+      <button onClick={() => setFitlerExpression("name~'Jo'")}>
+        Set Filter
+      </button>
+
       <input
         className="filter-input"
         type="text"
         placeholder="filter input"
-        onChange={setFilterData}
+        onChange={(e) => setFitlerExpression(e.target.value)}
+        value={filterExpression}
       />
       {filterError && <p>{filterError}</p>}
 
-      <table className="table">
-        <thead className="table-grid-header">
-          <tr>
-            {getTableColumns().map((column, index) => (
-              <th key={index}>{column}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="table-grid-item">
-          {tabledata.map((data, index) => (
-            <tr key={index}>
-              {getTableColumns().map((column, index) => (
-                <td key={index}>{data[column]}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <DynamicTable data={tabledata} columns={table_colums} />
     </div>
   );
 }
