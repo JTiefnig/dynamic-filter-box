@@ -31,17 +31,22 @@
   max-width: 500px;
 }
 
-.dynamic-input {
-  padding: 8px;
+.tokens-list {
+  padding: 4px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  height: 20px;
-  width: 100%;
+  width: 50%;
   max-width: 500px;
   display: flex;
   align-items: center;
+  justify-self: center;
   flex-direction: row;
+  gap: 8px;
 }
 
 .element {
+  padding: 8px;
+  border-radius: 8px;
+  background-color: #0c2c34;
+  color: white;
 }

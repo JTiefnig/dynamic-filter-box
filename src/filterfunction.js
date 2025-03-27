@@ -1,10 +1,32 @@
+function tokenize(query) {
+  const OPERATORS = {
+    ":": (a, b) => a == b,
+    ">=": (a, b) => a >= b,
+    "<=": (a, b) => a <= b,
+    ">": (a, b) => a > b,
+    "<": (a, b) => a < b,
+    include: (a, b) => a.includes(b),
+  };
+  // Escape special characters for regex
+  const escapedOperators = Object.keys(OPERATORS)
+    .map((op) => op.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) // Escape regex special characters
+    .join("|");
 
+  for (let key in OPERATORS) {
+    console.log(key);
+  }
 
+  const AND_OR_OPERATORS = ["AND", "OR"];
 
-unction tokenize(query) {
-  return query.match(/\(|\)|\w+\s*(>=|<=|>|<|:|~)\s*"?[\w\s]+"?|AND|OR/g);
+  const regex = new RegExp(
+    `(\\w+)\\s*(${escapedOperators})\\s*("?\\w+"?)?|\\b(${AND_OR_OPERATORS.join(
+      "|"
+    )})|\\b(true|false)\\b`,
+    "g"
+  );
+
+  return query.match(regex);
 }
-
 function parseTokens(tokens) {
   const output = [];
   const operators = [];
@@ -46,6 +68,8 @@ function parseTokens(tokens) {
 
   return output;
 }
+
+export default tokenize;
 
 function evaluateExpression(rpnExpression, obj) {
   const stack = [];

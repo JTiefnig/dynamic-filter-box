@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import DynamicTable from "./DynamicTable";
 import "./App.css";
+import tokenize from "./filterfunction";
 
 const data_url =
   "https://raw.githubusercontent.com/Ovi/DummyJSON/refs/heads/master/database/products.json";
 
 function App() {
   const [originaltabledata, setOriginalTableData] = useState([]);
-
   const [tabledata, setTableData] = useState([]);
+  const [tokens, setTokens] = useState([]);
 
   useEffect(() => {
     fetch(data_url)
@@ -26,8 +27,20 @@ function App() {
     setFilterData();
   }, [filterExpression]);
 
-  function setFilterData() {}
+  function setFilterData() {
+    try {
+      const tokens = tokenize(filterExpression);
+      if (tokens !== null) {
+        setTokens(tokens);
+        return;
+      }
+    } catch (e) {
+      setFilterError(e.message);
+      setTokens([]);
+    }
+  }
 
+  // for testing purposes
   const table_colums = [
     "id",
     "title",
@@ -41,17 +54,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Testing Filter Script</h1>
-
-      <div className="dynamic-input">
-        <div className="element A"></div>
-        <div className="element O"></div>
-        <input type="text" className="element" />
-      </div>
-
-      <button onClick={() => setFitlerExpression("name~'Jo'")}>
-        Set Filter
-      </button>
+      <h1>Dynamic Filter</h1>
 
       <input
         className="filter-input"
@@ -61,6 +64,14 @@ function App() {
         value={filterExpression}
       />
       {filterError && <p>{filterError}</p>}
+
+      <div className="tokens-list">
+        {tokens.map((token, index) => (
+          <div key={index} className="element">
+            {token}
+          </div>
+        ))}
+      </div>
 
       <DynamicTable data={tabledata} columns={table_colums} />
     </div>
